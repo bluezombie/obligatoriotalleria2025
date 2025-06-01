@@ -97,6 +97,9 @@ class Agent(ABC):
 
                 # TODO: Almacenar transición en replay memory
 
+                # Ingresamos en la memoria de replay la "Transition" definida
+                # en la replay memory (tupla).
+
                 self.memory.push(
                     Transition(state_phi, action, reward, next_state_phi, done)
                 )
