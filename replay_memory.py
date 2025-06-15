@@ -52,8 +52,6 @@ class ReplayMemory:
         Returns:
          - lista de Transition de longitud batch_size.
         """
-        # TODO: verificar que batch_size <= len(self)
-        # TODO: retornar una muestra aleatoria de self.memory
         if batch_size > len(self.memory):
             raise ValueError(
                 "cantidad (batch_size) mayor a la cantidad de transiciones en memoria "
@@ -65,13 +63,13 @@ class ReplayMemory:
         """
         Devuelve el número actual de transiciones en memoria.
         """
-        # TODO: retornar tamaño de la lista de memoria
+
         return len(self.memory)
 
     def clear(self):
         """
         Elimina todas las transiciones de la memoria.
         """
-        # TODO: resetear lista de memoria y puntero de posición
+
         self.memory = []
         self.position = 0
