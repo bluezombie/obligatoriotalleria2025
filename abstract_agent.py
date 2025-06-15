@@ -100,7 +100,7 @@ class Agent(ABC):
                 # Ingresamos en la memoria de replay la "Transition" definida
                 # en la replay memory (tupla).
 
-                self.memory.add(state_phi, action, reward, next_state_phi, done)
+                self.memory.add(state_phi, action, reward, done, next_state_phi)
 
                 # TODO: Llamar a update_weights() para entrenar modelo
 
