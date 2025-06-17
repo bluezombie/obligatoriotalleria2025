@@ -88,7 +88,7 @@ class DQNAgent(Agent):
 
         return greedy_action
 
-    def update_weights(self):
+    def update_weights(self, verbose=False):
         # 1) Comprobar que hay al menos batch_size muestras en memoria
         if len(self.memory) > self.batch_size:
             # Debemos resetear los gradientes del optimizador
@@ -107,7 +107,10 @@ class DQNAgent(Agent):
             stacked_states = torch.stack(states, dim=0).to(
                 self.device
             )  # shape: (BATCH, 4, 84, 84)
-            print(f"Shape of stacked_states: {stacked_states.shape}")
+
+            print(
+                f"Shape of stacked_states: {stacked_states.shape}"
+            ) if verbose else None
 
             # states = torch.tensor(states, dtype=torch.float32, device=self.device)
 
@@ -116,22 +119,20 @@ class DQNAgent(Agent):
             stacked_actions = torch.tensor(
                 actions, dtype=torch.int64, device=self.device
             ).unsqueeze(1)
-            print(f"Shape of stacked_actions: {stacked_actions.shape}")
-
-            # rewards = torch.tensor(rewards, dtype=torch.float32, device=self.device)
+            print(
+                f"Shape of stacked_actions: {stacked_actions.shape}"
+            ) if verbose else None
 
             stacked_rewards = torch.tensor(
                 rewards, dtype=torch.float32, device=self.device
             ).unsqueeze(1)
-            print(f"Shape of stacked_rewards: {stacked_rewards.shape}")
+            print(
+                f"Shape of stacked_rewards: {stacked_rewards.shape}"
+            ) if verbose else None
 
-            stacked_dones = torch.stack(dones, dim=0).to(self.device)
-            print(f"Shape of stacked_dones: {stacked_dones.shape}")
-
-            # dones = torch.tensor(dones, dtype=torch.float32, device=self.device)
-            # next_states = torch.tensor(
-            #     next_states, dtype=torch.float32, device=self.device
-            # )
+            stacked_dones = torch.tensor(
+                dones, dtype=torch.float32, device=self.device
+            ).unsqueeze(1)
 
             stacked_next_states = torch.stack(next_states, dim=0).to(self.device)
 
@@ -166,9 +167,12 @@ class DQNAgent(Agent):
             # 4) Con torch.no_grad(): calcular max_q_next_state = policy_net(next_states).max(dim=1)[0] * (1 - dones)
             with torch.no_grad():
                 q_sn = self.policy_net(stacked_next_states)
+                print(f"Shape of q_sn: {q_sn.shape}") if verbose else None
                 # Multipliando por (1 - dones) validamos que el episodio haya terminado
-                q_sna = q_sn.max(dim=1)[0] * (1 - stacked_dones)
+                # q_sna = q_sn.max(dim=1)[0] * (1 - stacked_dones)
+                q_sna = q_sn.max(1, keepdim=True)[0] * (1 - stacked_dones)
 
+            print(f"Shape of q_sna: {q_sna.shape}") if verbose else None
             # Validamos que max_q_next_state tenga el shape esperado
             assert q_sna.shape == (self.batch_size, 1), (
                 "max_q_next_state no posee el shape esperado"
