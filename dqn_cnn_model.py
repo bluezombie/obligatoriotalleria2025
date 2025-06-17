@@ -63,6 +63,11 @@ class DQN_CNN_Model(nn.Module):
         #  - stride=4
         #  - filters=16
 
+        # Definimos la segundo capa convolucional:
+        #  - kernel_size=4
+        #  - stride=2
+        #  - filters=32
+
         self.conv2 = nn.Conv2d(16, 32, kernel_size=4, stride=2)
 
         # Calculemos a continuación el tamaño de la última capa
@@ -80,10 +85,13 @@ class DQN_CNN_Model(nn.Module):
         # Por lo tanto, la cantidad de entradas para la capa
         # lineal es:
         # 32 * 9 * 9 = 2592
+        # La salida, de acuerdo al paper, es de 256 neuronas.
+        
         self.fc1 = nn.Linear(32 * 9 * 9, 256)
 
         # Luego, la salida queda definda por la cantidad
         # de acciones (dependiendo del ambiente)
+
         self.output = nn.Linear(256, n_actions)
 
     def forward(self, obs):
