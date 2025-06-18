@@ -76,7 +76,7 @@ class DQNAgent(Agent):
 
         # Si no es entrenamiento, obtenemos la acción greedy
         # Procesamos el estado, y lo convertimos a tensor
-        state_tensor = self.obs_processing_function(state)
+        state_tensor = self.obs_processing_function(state).unsqueeze(0)
 
         # Calcular Q-values con policy_net
         with torch.no_grad():
