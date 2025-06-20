@@ -5,6 +5,7 @@ from replay_memory import ReplayMemory, Transition
 from abc import ABC, abstractmethod
 from tqdm import tqdm
 import random
+from utils import save_model_checkpoint, load_model_checkpoint
 
 
 class Agent(ABC):
@@ -123,8 +124,12 @@ class Agent(ABC):
             metrics["steps"] = total_steps
             pbar.set_postfix(metrics)
 
+            # Guardamos el modelo cada ciertos episodios
+            if ep % 50 == 0:
+                save_model_checkpoint(self.policy_net, f"./data/dqn_model_{ep}.pth")
+
         # Guardar el modelo entrenado
-        torch.save(self.policy_net.state_dict(), "GenericDQNAgent.dat")
+        # save_model_checkpoint(self.policy_net, "dqn_model.pth")
 
         return rewards
 

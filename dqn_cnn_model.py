@@ -102,19 +102,19 @@ class DQN_CNN_Model(nn.Module):
 
         # 1.a Aplicamos la primera capa convolucional
         # con su respectiva función de activación.
-        print(f"Input shape: {obs.shape}")  # Debugging line
+        # print(f"Input shape: {obs.shape}")  # Debugging line
         result = F.relu(self.conv1(obs))
-        print(f"After conv1 shape: {result.shape}")
+        # print(f"After conv1 shape: {result.shape}")
         # 1.b Aplicamos la segunda capa convolucional
         result = F.relu(self.conv2(result))
-        print(f"After conv2 shape: {result.shape}")
+        # print(f"After conv2 shape: {result.shape}")
         # 2 Aplanamos la salida
         result = result.view(result.size(0), -1)
-        print(f"After flattening shape: {result.shape}")
+        # print(f"After flattening shape: {result.shape}")
         # 3 Aplicamos las capas lineales
         result = F.relu(self.fc1(result))
         result = self.output(result)
-        print(f"After output layer shape: {result.shape}")
+        # print(f"After output layer shape: {result.shape}")
         # 4 Devolvemos el tensor de Q-values
 
         return result
