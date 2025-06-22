@@ -49,6 +49,10 @@ class Agent(ABC):
     def train(
         self, number_episodes=50_000, max_steps_episode=10_000, max_steps=1_000_000
     ):
+        # Cargamos un model checkpoint si existe
+        # self.policy_net = load_model_checkpoint(self.policy_net, "./data/")
+        # self.policy_net = load_model_checkpoint(self.policy_net, "/content/drive/MyDrive/2025obltalleria/data/")
+
         rewards = []
         total_steps = 0
 
@@ -81,7 +85,8 @@ class Agent(ABC):
 
                 # Ejecutamos la acción.
 
-                next_state, reward, done, _, _ = self.env.step(action)
+                next_state, reward, terminated, truncated, _ = self.env.step(action)
+                done = terminated or truncated
 
                 # TODO: Procesar next_state con state_processing_function
 
@@ -125,11 +130,9 @@ class Agent(ABC):
             pbar.set_postfix(metrics)
 
             # Guardamos el modelo cada ciertos episodios
-            if ep % 50 == 0:
-                save_model_checkpoint(self.policy_net, f"./data/dqn_model_{ep}.pth")
+            if ep % 1_500 == 0:
+              save_model_checkpoint(self.policy_net, f"/content/drive/MyDrive/2025obltalleria_v4/data/dqn_model_{ep}.pth")
 
-        # Guardar el modelo entrenado
-        # save_model_checkpoint(self.policy_net, "dqn_model.pth")
 
         return rewards
 
@@ -150,12 +153,25 @@ class Agent(ABC):
         Modo evaluación: ejecutar episodios sin actualizar la red.
         """
         for ep in range(episodes):
-            state, _ = env.reset()
+            state, reset_state = env.reset()
+            print(reset_state)
             done = False
-            while not done:
-                # TODO: seleccionar acción sin exploración
-                # TODO: ejecutar acción y actualizar estado
-                pass
+            step = 0
+            while not done and step < 10_000:
+                action = self.select_action(
+                    state,
+                    step,
+                    train=False,
+                )
+                # Cada 500 pasos imprimimos el estado actual
+                next_state, reward, done, _, _ = env.step(action)
+                state = next_state
+                step += 1
+                if step % 500 == 0:
+                    print(f"Estado actual: {state}, Paso: {step}")
+                    print(
+                        f"Episode {ep + 1}, Step {step}: Action {action}, Reward {reward}"
+                    )
 
     @abstractmethod
     def select_action(self, state, current_steps, train=True):

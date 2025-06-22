@@ -4,6 +4,7 @@ import gymnasium
 from gymnasium import ObservationWrapper
 from gymnasium.spaces import Box
 import torch
+import os
 from gymnasium.wrappers import (
     TransformReward,
     RecordVideo,
@@ -91,10 +92,56 @@ def load_model_checkpoint(model, path):
         model (torch.nn.Module): Modelo donde se cargará el estado.
         path (str): Ruta del archivo desde donde se cargará el modelo.
     """
-    model.load_state_dict(torch.load(path))
-    print(f"Modelo cargado desde {path}")
+    path = get_last_checkpoint(path)
+    if path is None:
+        print("No se encontraron checkpoints para cargar.")
+    else:
+        # Cargamos el estado del modelo
+        model = torch.load(path, weights_only=False)
+        print(f"Modelo cargado desde {path}")
     return model
 
+
+# Definimos una función para determinar el último checkpoint guardado
+def get_last_checkpoint(path):
+    """
+    Obtiene la ruta del último checkpoint guardado.
+
+    Args:
+        path (str): Ruta del directorio donde se guardan los checkpoints.
+
+    Returns:
+        str: Ruta del último checkpoint guardado, o None si no hay checkpoints.
+    """
+    checkpoints = [f for f in os.listdir(path) if f.endswith(".pth")]
+    if not checkpoints:
+        return None
+    return os.path.join(path, sorted(checkpoints)[-1])
+
+# Definimos una función que devuelve un timetsamp
+def get_timestamp():
+  timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+  return timestamp
+
+
+# Definimos una función para guardar arrays en disco, que podrán
+# ser utilizadas luego para graficarse
+def save_numpy_array(path, file_name, array):
+  try:
+      timestamp = get_timestamp()
+      full_file_name = path + '/' + file_name + '_' + timestamp 
+      np.save(full_file_name, array)
+  except Exception as e:
+      print(f"No fue posible salvar array {file_name}")
+
+# Definioms función análoga para la lectura de un array
+def load_numpy_array(path, file_name):
+  try:
+      array = np.load(path + '/' + file_name)
+      return array
+  except Exception as e:
+      print(f"No fue posible cargar {file_name}")
+      return None
 
 def make_env(
     env_name: str,
@@ -120,7 +167,7 @@ def make_env(
             fps=env.metadata.get("render_fps", 30) * skip_frames,
         )
 
-    # env = FireOnLifeLostWrapper(env)
+    env = FireOnLifeLostWrapper(env)
 
     env = AtariPreprocessing(
         env,
@@ -139,3 +186,22 @@ def make_env(
     env = TransformReward(env, sign_fn)
 
     return env
+
+
+# Definimos función para graficar los rewards obtenidos en un episodio
+def plot_rewards(rewards, title="Rewards over time"):
+    """
+    Grafica los rewards obtenidos en un episodio.
+
+    Args:
+        rewards (list): Lista de rewards obtenidos en cada paso del episodio.
+        title (str): Título del gráfico.
+    """
+    plt.figure(figsize=(10, 5))
+    plt.plot(rewards, label="Rewards")
+    plt.xlabel("Steps")
+    plt.ylabel("Reward")
+    plt.title(title)
+    plt.legend()
+    plt.grid()
+    plt.show()

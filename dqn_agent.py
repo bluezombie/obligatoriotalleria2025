@@ -51,7 +51,7 @@ class DQNAgent(Agent):
         )
 
         # Configurar función de pérdida MSE y optimizador Adam
-        self.criterion = nn.MSELoss()
+        self.criterion = nn.MSELoss().to(self.device)
 
         # Crear replay memory de tamaño buffer_size
         self.memory = ReplayMemory(memory_buffer_size)
@@ -76,7 +76,10 @@ class DQNAgent(Agent):
 
         # Si no es entrenamiento, obtenemos la acción greedy
         # Procesamos el estado, y lo convertimos a tensor
-        state_tensor = self.obs_processing_function(state).unsqueeze(0)
+        if train:
+          state_tensor = state.unsqueeze(0).to(self.device)
+        else:
+          state_tensor = self.obs_processing_function(state).unsqueeze(0).to(self.device)
 
         # Calcular Q-values con policy_net
         with torch.no_grad():
@@ -182,7 +185,8 @@ class DQNAgent(Agent):
             target = stacked_rewards + self.gamma * q_sna
 
             # 6) Computar loss MSE entre q_current y target, backprop y optimizer.step()
-            loss = self.criterion(target, q_sa)
+            # loss = self.criterion(target, q_sa)
+            loss = self.criterion(q_sa, target.detach())
             loss.backward()
             self.optimizer.step()
 
