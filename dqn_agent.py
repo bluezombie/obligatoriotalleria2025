@@ -69,17 +69,13 @@ class DQNAgent(Agent):
         # Durante entrenamiento: con probabilidad epsilon acción aleatoria
         #                   sino greedy_action
 
-        if train:
-            self.epsilon = self.compute_epsilon(current_steps)
-            if np.random.rand() < self.epsilon:
-                return self.env.action_space.sample()
+        if train and np.random.rand() < self.compute_epsilon(current_steps):
+            return self.env.action_space.sample()
 
-        # Si no es entrenamiento, obtenemos la acción greedy
-        # Procesamos el estado, y lo convertimos a tensor
-        if train:
-          state_tensor = state.unsqueeze(0).to(self.device)
-        else:
-          state_tensor = self.obs_processing_function(state).unsqueeze(0).to(self.device)
+        # Si no estoy entrenando o no quiero explorar,
+        # tomamos el estado pasado como parámetro
+        # y seleccionamos la acción greedy.
+        state_tensor = state.unsqueeze(0).to(self.device)
 
         # Calcular Q-values con policy_net
         with torch.no_grad():
