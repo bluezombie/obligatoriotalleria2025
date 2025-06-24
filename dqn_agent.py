@@ -75,7 +75,12 @@ class DQNAgent(Agent):
         # Si no estoy entrenando o no quiero explorar,
         # tomamos el estado pasado como parámetro
         # y seleccionamos la acción greedy.
-        state_tensor = state.unsqueeze(0).to(self.device)
+        if train:
+            state_tensor = state.unsqueeze(0).to(self.device)
+        else:
+            state_tensor = (
+                self.obs_processing_function(state).unsqueeze(0).to(self.device)
+            )
 
         # Calcular Q-values con policy_net
         with torch.no_grad():

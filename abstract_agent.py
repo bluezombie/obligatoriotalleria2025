@@ -131,8 +131,10 @@ class Agent(ABC):
 
             # Guardamos el modelo cada ciertos episodios
             if ep % 1_500 == 0:
-              save_model_checkpoint(self.policy_net, f"/content/drive/MyDrive/2025obltalleria_v4/data/dqn_model_{ep}.pth")
-
+                save_model_checkpoint(
+                    self.policy_net,
+                    f"/content/drive/MyDrive/2025obltalleria_v4/data/dqn_model_{ep}.pth",
+                )
 
         return rewards
 
@@ -152,9 +154,9 @@ class Agent(ABC):
         """
         Modo evaluación: ejecutar episodios sin actualizar la red.
         """
+        self.policy_net.eval()  # Aseguramos que el modelo esté en modo evaluación
         for ep in range(episodes):
             state, reset_state = env.reset()
-            print(reset_state)
             done = False
             step = 0
             while not done and step < 10_000:
@@ -164,7 +166,11 @@ class Agent(ABC):
                     train=False,
                 )
                 # Cada 500 pasos imprimimos el estado actual
-                next_state, reward, done, _, _ = env.step(action)
+                next_state, reward, terminated, truncated, _ = env.step(action)
+                done = terminated or truncated
+                if done:
+                    print(f"Episodio {ep + 1} terminado en {step} pasos.")
+                    break
                 state = next_state
                 step += 1
                 if step % 500 == 0:
@@ -172,6 +178,7 @@ class Agent(ABC):
                     print(
                         f"Episode {ep + 1}, Step {step}: Action {action}, Reward {reward}"
                     )
+        self.policy_net.train()  # volvemos al modo entrenamiento
 
     @abstractmethod
     def select_action(self, state, current_steps, train=True):
