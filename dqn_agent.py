@@ -65,32 +65,16 @@ class DQNAgent(Agent):
         self.epsilon = epsilon_i
 
     def select_action(self, state, current_steps, train=True):
-        # Calcular epsilon según step
-        # Durante entrenamiento: con probabilidad epsilon acción aleatoria
-        #                   sino greedy_action
-
-        if train and np.random.rand() < self.compute_epsilon(current_steps):
-            return self.env.action_space.sample()
-
-        # Si no estoy entrenando o no quiero explorar,
-        # tomamos el estado pasado como parámetro
-        # y seleccionamos la acción greedy.
-        if train:
-            state_tensor = state.unsqueeze(0).to(self.device)
-        else:
-            state_tensor = (
-                self.obs_processing_function(state).unsqueeze(0).to(self.device)
+        if train and np.random.uniform() < self.compute_epsilon(current_steps):
+            action = torch.tensor(
+                [[np.random.randrange(self.env.action_space.n)]], dtype=torch.long
             )
-
-        # Calcular Q-values con policy_net
-        with torch.no_grad():
-            q_values = self.policy_net(state_tensor)
-
-            # Obtenemos un array de Q-values y seleccionamos la acción greedy
-            # con dimensiones 1 x 4
-            greedy_action = q_values.argmax(dim=1).item()
-
-        return greedy_action
+            return action
+        else:
+            with torch.no_grad():
+                state = state.unsqueeze(0).to(self.device)
+                max_action = self.policy_net(state).argmax(dim=1).view(1, 1)
+                return max_action
 
     def update_weights(self, verbose=False):
         # 1) Comprobar que hay al menos batch_size muestras en memoria
