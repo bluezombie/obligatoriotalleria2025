@@ -96,7 +96,7 @@ class DoubleDQNAgent(Agent):
 
         # Calcular Q-values con policy_net
         with torch.no_grad():
-            q_values = self.policy_net(state_tensor)
+            q_values = self.online_net(state_tensor)
 
             # Obtenemos un array de Q-values y seleccionamos la acción greedy
             # con dimensiones 1 x 4
