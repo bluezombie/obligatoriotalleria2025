@@ -156,7 +156,7 @@ class DoubleDQNAgent(Agent):
             )
 
             # 3) Calcular q_current: online_net(states).gather(…)
-            q_s = self.online_net_net(stacked_states)
+            q_s = self.online_net(stacked_states)
             q_current = q_s.gather(1, stacked_actions)
 
             # Validamos que q_current tenga el shape esperado
