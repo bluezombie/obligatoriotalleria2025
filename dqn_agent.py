@@ -3,6 +3,7 @@ import torch.nn as nn
 import numpy as np
 from abstract_agent import Agent
 from replay_memory import ReplayMemory, Transition
+import random
 
 
 class DQNAgent(Agent):
@@ -67,7 +68,7 @@ class DQNAgent(Agent):
     def select_action(self, state, current_steps, train=True):
         if train and np.random.uniform() < self.compute_epsilon(current_steps):
             action = torch.tensor(
-                [[np.random.randrange(self.env.action_space.n)]], dtype=torch.long
+                [[random.randrange(self.env.action_space.n)]], dtype=torch.long
             )
             return action
         else:
