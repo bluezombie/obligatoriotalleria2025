@@ -37,14 +37,14 @@ class DQNAgent(Agent):
         )
         # Guardar entorno y función de preprocesamiento
 
-        self.env = env
-        self.obs_processing_function = obs_processing_func
+        # self.env = env
+        # self.obs_processing_function = obs_processing_func
         self.policy_net = model.to(device)
-        self.learning_rate = learning_rate
-        self.memory_buffer_size = memory_buffer_size
-        self.episode_block = episode_block
-        self.total_steps = 0
-        self.device = device
+        # self.learning_rate = learning_rate
+        # self.memory_buffer_size = memory_buffer_size
+        # self.episode_block = episode_block
+        # self.total_steps = 0
+        # self.device = device
 
         # Configurar optimizador Adam
         self.optimizer = torch.optim.Adam(
@@ -55,27 +55,24 @@ class DQNAgent(Agent):
         self.criterion = nn.MSELoss().to(self.device)
 
         # Crear replay memory de tamaño buffer_size
-        self.memory = ReplayMemory(memory_buffer_size)
+        # self.memory = ReplayMemory(memory_buffer_size)
 
         # Almacenar batch_size, gamma y parámetros de epsilon-greedy
-        self.batch_size = batch_size
-        self.gamma = gamma
-        self.epsilon_i = epsilon_i
-        self.epsilon_f = epsilon_f
-        self.epsilon_anneal_steps = epsilon_anneal_steps
-        self.epsilon = epsilon_i
+        # self.batch_size = batch_size
+        # self.gamma = gamma
+        # self.epsilon_i = epsilon_i
+        # self.epsilon_f = epsilon_f
+        # self.epsilon_anneal_steps = epsilon_anneal_steps
+        # self.epsilon = epsilon_i
 
     def select_action(self, state, current_steps, train=True):
-        if train and np.random.uniform() < self.compute_epsilon(current_steps):
-            action = torch.tensor(
-                [[random.randrange(self.env.action_space.n)]], dtype=torch.long
-            )
-            return action
+        if train and np.random.rand() < self.compute_epsilon(current_steps):
+            return self.env.action_space.sample()  # Acción aleatoria
         else:
             with torch.no_grad():
                 state = state.unsqueeze(0).to(self.device)
-                max_action = self.policy_net(state).argmax(dim=1).view(1, 1)
-                return max_action
+                max_action = self.policy_net(state).argmax(dim=1)
+                return max_action.item()
 
     def update_weights(self, verbose=False):
         # 1) Comprobar que hay al menos batch_size muestras en memoria
@@ -172,10 +169,9 @@ class DQNAgent(Agent):
 
             # 6) Computar loss MSE entre q_current y target, backprop y optimizer.step()
             # loss = self.criterion(target, q_sa)
-            loss = self.criterion(q_sa, target.detach())
+            loss = self.criterion(q_sa, target)
             loss.backward()
             self.optimizer.step()
 
-            # 7) Actualizar total_steps
-            self.total_steps += 1
+            # self.total_steps += 1
             return loss.item()

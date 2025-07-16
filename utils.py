@@ -5,7 +5,6 @@ from gymnasium import ObservationWrapper
 from gymnasium.spaces import Box
 import torch
 import os
-from datetime import datetime
 from gymnasium.wrappers import (
     TransformReward,
     RecordVideo,
@@ -15,6 +14,7 @@ from gymnasium.wrappers import (
     AtariPreprocessing,
     FrameStackObservation,
 )
+from datetime import datetime
 
 
 def show_observation(observation):
@@ -119,33 +119,30 @@ def get_last_checkpoint(path):
         return None
     return os.path.join(path, sorted(checkpoints)[-1])
 
-
 # Definimos una función que devuelve un timetsamp
 def get_timestamp():
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    return timestamp
+  timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+  return timestamp
 
 
 # Definimos una función para guardar arrays en disco, que podrán
 # ser utilizadas luego para graficarse
 def save_numpy_array(path, file_name, array):
-    try:
-        timestamp = get_timestamp()
-        full_file_name = path + "/" + file_name + "_" + timestamp
-        np.save(full_file_name, array)
-    except Exception as e:
-        print(f"No fue posible salvar array {file_name}")
-
+  try:
+      timestamp = get_timestamp()
+      full_file_name = path + '/' + file_name + '_' + timestamp 
+      np.save(full_file_name, array)
+  except Exception as e:
+      print(f"No fue posible salvar array {file_name}")
 
 # Definioms función análoga para la lectura de un array
 def load_numpy_array(path, file_name):
-    try:
-        array = np.load(path + "/" + file_name)
-        return array
-    except Exception as e:
-        print(f"No fue posible cargar {file_name}")
-        return None
-
+  try:
+      array = np.load(path + '/' + file_name)
+      return array
+  except Exception as e:
+      print(f"No fue posible cargar {file_name}")
+      return None
 
 def make_env(
     env_name: str,
